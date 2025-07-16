@@ -1,6 +1,7 @@
 package com.wziem.store.controllers;
 
 
+import com.wziem.store.dtos.RegisterUserRequest;
 import com.wziem.store.dtos.UserDto;
 import com.wziem.store.mappers.UserMapper;
 import com.wziem.store.repositories.UserRepository;
@@ -8,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -41,7 +43,11 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto createUser(@RequestBody UserDto data) {
-        return data;
+    public ResponseEntity<UserDto> createUser(UriComponentsBuilder uriBuilder, @RequestBody RegisterUserRequest request) {
+        var user = userMapper.toEntity(request);
+        userRepository.save(user);
+        var userDto = userMapper.toDto(user);
+        var uri = uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
+        return ResponseEntity.created(uri).body(userDto);
     }
 }
