@@ -28,7 +28,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<List<ProductDto>> findAllProducts(
             @RequestParam(name = "categoryId", required = false, defaultValue = "0") byte id) {
-
+        //could also return empty list when given wrong argument
         if (id == 0) {
             var result = productRepository.findAll().stream()
                     .map(productMapper::toDto)
