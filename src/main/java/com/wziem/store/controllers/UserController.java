@@ -3,6 +3,7 @@ package com.wziem.store.controllers;
 
 import com.wziem.store.dtos.UserDto;
 import com.wziem.store.entities.User;
+import com.wziem.store.mappers.UserMapper;
 import com.wziem.store.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,11 +22,12 @@ import java.util.stream.Collectors;
 @RequestMapping("/users") //for every endpoint starting with /users
 public class UserController {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @GetMapping()
     //method: GET
     public Iterable<UserDto> getAllUsers() {
-        return userRepository.findAll().stream().map(user -> new UserDto(user.getId(), user.getName(), user.getEmail())).collect(Collectors.toList());
+        return userRepository.findAll().stream().map(userMapper::toDto).collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
@@ -34,7 +36,6 @@ public class UserController {
         if(user == null){
             return ResponseEntity.notFound().build();
         }
-        var userDto = new UserDto(user.getId(), user.getName(), user.getEmail());
-        return ResponseEntity.ok(userDto);
+        return ResponseEntity.ok(userMapper.toDto(user));
     }
 }
