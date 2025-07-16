@@ -1,5 +1,6 @@
-package com.codewithmosh.store.entities;
+package com.wziem.store.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
