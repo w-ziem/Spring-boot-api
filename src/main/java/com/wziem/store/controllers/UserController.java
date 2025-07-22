@@ -7,13 +7,17 @@ import com.wziem.store.dtos.UpdateUserRequest;
 import com.wziem.store.dtos.UserDto;
 import com.wziem.store.mappers.UserMapper;
 import com.wziem.store.repositories.UserRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,7 +50,12 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(UriComponentsBuilder uriBuilder, @RequestBody RegisterUserRequest request) {
+    // MethodArgumentNotValidException
+    public ResponseEntity<?> registerUser(UriComponentsBuilder uriBuilder, @Valid @RequestBody RegisterUserRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())){
+            return ResponseEntity.badRequest().body(Map.of("email", "Email is already registered"));
+        }
+
         var user = userMapper.toEntity(request);
         userRepository.save(user);
         var userDto = userMapper.toDto(user);
