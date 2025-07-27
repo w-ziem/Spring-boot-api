@@ -2,15 +2,10 @@ package com.wziem.store.controllers;
 
 
 import com.wziem.store.dtos.*;
-import com.wziem.store.entities.Cart;
-import com.wziem.store.entities.CartItem;
 import com.wziem.store.exceptions.CartNotFoundException;
 import com.wziem.store.exceptions.ProductNotFoundException;
 import com.wziem.store.mappers.CartItemResponseMapper;
-import com.wziem.store.mappers.CartMapper;
-import com.wziem.store.mappers.NewCartMapper;
 import com.wziem.store.repositories.CartRepository;
-import com.wziem.store.repositories.ProductRepository;
 import com.wziem.store.services.CartService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,7 +15,6 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -35,9 +29,6 @@ import java.util.UUID;
 public class CartController {
     private final CartRepository cartRepository;
     private final CartItemResponseMapper cartItemResponseMapper;
-    private final ProductRepository productRepository;
-    private final NewCartMapper newCartMapper;
-    private final CartMapper cartMapper;
     private final CartService cartService;
 
 
