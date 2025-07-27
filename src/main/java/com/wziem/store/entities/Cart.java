@@ -82,7 +82,7 @@ public class Cart {
 
     public void clearCart() {
         if(cartItems != null) {
-            cartItems.forEach(item -> item.setCart(null));
+//            cartItems.forEach(item -> item.setCart(null)); // nie trzeba, bo jpa/hibernate traktuje rzeczy usuniete Z KOLEKCJI PO STRONIE RODZICA jako oprhan, a nie dzieci z usunieta referencja do rodzica
             cartItems.clear();
         }
     }
