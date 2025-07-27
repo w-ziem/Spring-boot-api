@@ -2,10 +2,13 @@ package com.wziem.store.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -24,7 +27,7 @@ public class Cart {
     @Column(name = "date_created")
     private LocalDate dateCreated;
 
-    @OneToMany(mappedBy = "cart", cascade = {CascadeType.PERSIST}, orphanRemoval = true)
+    @OneToMany(mappedBy = "cart", cascade = {CascadeType.MERGE}, orphanRemoval = true)
     @ToString.Exclude
     private Set<CartItem> cartItems = new HashSet<>();
 
@@ -38,11 +41,49 @@ public class Cart {
     @Transient // Ta adnotacja informuje JPA, żeby ignorowało to pole przy mapowaniu do bazy
     public BigDecimal getTotalPrice() {
         return cartItems.stream()
-            .map(item -> item.getProduct().getPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            .map(CartItem::getTotalPrice)
+            .reduce(BigDecimal.ZERO, BigDecimal::add); //equivalent of declaring total = BigDecimal.ZERO and iteratind (adding)
     }
 
-    public void addCartItem(CartItem newItem) {
-        this.cartItems.add(newItem);
+
+    public CartItem getCartItem(Long productId) {
+        return cartItems.stream()
+            .filter(item -> item.getProduct().getId().equals(productId))
+            .findFirst()
+            .orElse(null);
+    }
+
+    public CartItem addCartItem(Product product){
+        //czy produkt jest juz w koszyku
+        var cartItem = this.getCartItem(product.getId());
+
+        //tworzenie produktu jeżeli nie istnieje
+        if(cartItem != null) {
+            cartItem.increaseQuantity();
+        } else{
+            cartItem = new CartItem();
+            cartItem.setProduct(product);
+            cartItem.setCart(this);
+            cartItem.setQuantity(1);
+            cartItems.add(cartItem);
+        }
+
+        return cartItem;
+
+    }
+
+    public void removeCartItem(Long productId) {
+        var cartItem = this.getCartItem(productId);
+        if(cartItem != null){
+            this.getCartItems().remove(cartItem);
+            cartItem.setCart(null); //orphan removaal will delete this item automatically because it dosent have a cart assaigned
+        }
+    }
+
+    public void clearCart() {
+        if(cartItems != null) {
+            cartItems.forEach(item -> item.setCart(null));
+            cartItems.clear();
+        }
     }
 }

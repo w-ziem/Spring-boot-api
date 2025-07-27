@@ -4,6 +4,7 @@ package com.wziem.store.entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -30,6 +31,10 @@ public class CartItem {
 
     @Column(name = "quantity")
     private Integer quantity;
+
+    public BigDecimal getTotalPrice() {
+        return product.getPrice().multiply(BigDecimal.valueOf(quantity));
+    }
 
     public void increaseQuantity() {
         this.quantity++;

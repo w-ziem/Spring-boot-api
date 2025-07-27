@@ -13,15 +13,12 @@ public interface CartItemResponseMapper {
 
     @Mapping(source = "product", target = "product")
     @Mapping(source = "quantity", target = "quantity")
+    @Mapping(target = "totalPrice", expression = "java(cartItem.getTotalPrice())")
     CartItemResponseDto toDto(CartItem cartItem);
     
     @Mapping(source = "id", target = "id")
     @Mapping(source = "name", target = "name")
     @Mapping(source = "price", target = "price")
     ProductSummaryDto toProductSummaryDto(com.wziem.store.entities.Product product);
-    
-    @AfterMapping
-    default void afterMapping(@MappingTarget CartItemResponseDto dto) {
-        dto.calculateTotalPrice();
-    }
+
 }
