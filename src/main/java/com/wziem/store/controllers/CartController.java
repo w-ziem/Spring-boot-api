@@ -12,6 +12,9 @@ import com.wziem.store.mappers.NewCartMapper;
 import com.wziem.store.repositories.CartRepository;
 import com.wziem.store.repositories.ProductRepository;
 import com.wziem.store.services.CartService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -28,6 +31,7 @@ import java.util.UUID;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/carts")
+@Tag(name = "Carts", description = "Operations on carts")
 public class CartController {
     private final CartRepository cartRepository;
     private final CartItemResponseMapper cartItemResponseMapper;
@@ -52,7 +56,8 @@ public class CartController {
 
     @PostMapping("/{cartId}/items")
     @Transactional
-    public ResponseEntity<?> addProductToCart(UriComponentsBuilder uriBuilder, @PathVariable(name = "cartId") UUID id,  @RequestBody Long productId) {
+    @Operation(summary = "Add a product to the cart")
+    public ResponseEntity<?> addProductToCart(UriComponentsBuilder uriBuilder, @Parameter(description = "The UUID of the cart") @PathVariable(name = "cartId") UUID id, @RequestBody Long productId) {
 
         var cartItemDto = cartService.addToCart(id, productId);
 
