@@ -1,8 +1,11 @@
 package com.wziem.store.services;
 
+import com.wziem.store.config.JwtConfig;
+import com.wziem.store.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -10,19 +13,28 @@ import java.util.Date;
 
 
 @Service
+@AllArgsConstructor
 public class JwtService {
 
-    @Value("${spring.jwt.secret}")
-    private String secret;
+    private final JwtConfig jwtConfig;
 
-    public String generateToken(String email) {
-        final long tokenExpirationTime = 86400; //1 day in milliseconds
+    public String generateRefreshToken(User user) {
+        return generateToken(user, jwtConfig.getRefreshTokenExpiration());
+    }
 
+
+    public String generateAccessToken(User user) {
+        return generateToken(user, jwtConfig.getRefreshTokenExpiration());
+    }
+
+    private String generateToken(User user, long tokenExpirationTime) {
         return Jwts.builder()
-                .subject(email)
+                .subject(String.valueOf(user.getId()))
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + tokenExpirationTime))
-                .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .signWith(jwtConfig.getSecretKey())
+                .claim("email", user.getEmail())
+                .claim("name", user.getName())
                 .compact();
     }
 
@@ -39,14 +51,14 @@ public class JwtService {
     }
 
     private Claims getClaims(String token) {
-        return Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secret.getBytes()))
+        return Jwts.parser().verifyWith(jwtConfig.getSecretKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload() ;
     }
 
 
-    public String getEmailFromToken(String token) {
-        return getClaims(token).getSubject();
+    public Long getIdFromToken(String token) {
+        return Long.valueOf(getClaims(token).getSubject());
     }
 }

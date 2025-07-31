@@ -38,7 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         //we store email as principle of authenticated user object
         var authentication = new UsernamePasswordAuthenticationToken(
-                jwtService.getEmailFromToken(token),
+                jwtService.getIdFromToken(token),
                 null,
                 null
         );
