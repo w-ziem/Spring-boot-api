@@ -1,6 +1,7 @@
 package com.wziem.store.services;
 
 import com.wziem.store.config.JwtConfig;
+import com.wziem.store.entities.Role;
 import com.wziem.store.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -24,17 +25,18 @@ public class JwtService {
 
 
     public String generateAccessToken(User user) {
-        return generateToken(user, jwtConfig.getRefreshTokenExpiration());
+        return generateToken(user, jwtConfig.getAccessTokenExpiration());
     }
 
     private String generateToken(User user, long tokenExpirationTime) {
         return Jwts.builder()
                 .subject(String.valueOf(user.getId()))
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + tokenExpirationTime))
+                .expiration(new Date(System.currentTimeMillis() + tokenExpirationTime * 1000))
                 .signWith(jwtConfig.getSecretKey())
                 .claim("email", user.getEmail())
                 .claim("name", user.getName())
+                .claim("role", user.getRole())
                 .compact();
     }
 
@@ -60,5 +62,9 @@ public class JwtService {
 
     public Long getIdFromToken(String token) {
         return Long.valueOf(getClaims(token).getSubject());
+    }
+
+    public Role getRoleFromToken(String token) {
+        return Role.valueOf(getClaims(token).get("role", String.class));
     }
 }

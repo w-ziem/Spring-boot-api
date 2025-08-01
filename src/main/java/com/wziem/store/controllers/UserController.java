@@ -5,6 +5,7 @@ import com.wziem.store.dtos.ChangePasswordRequest;
 import com.wziem.store.dtos.RegisterUserRequest;
 import com.wziem.store.dtos.UpdateUserRequest;
 import com.wziem.store.dtos.UserDto;
+import com.wziem.store.entities.Role;
 import com.wziem.store.mappers.UserMapper;
 import com.wziem.store.repositories.UserRepository;
 import jakarta.validation.Valid;
@@ -60,6 +61,7 @@ public class UserController {
 
         var user = userMapper.toEntity(request);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(Role.USER);
         userRepository.save(user);
         var userDto = userMapper.toDto(user);
         var uri = uriBuilder.path("/users/{id}").buildAndExpand(userDto.getId()).toUri();
