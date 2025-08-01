@@ -1,13 +1,9 @@
 package com.wziem.store.services;
 
 import com.wziem.store.config.JwtConfig;
-import com.wziem.store.entities.Role;
 import com.wziem.store.entities.User;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -40,31 +36,13 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean validateToken(String token) {
-       try {
-           var claims = getClaims(token);
-
-           return claims.getExpiration().after(new Date());
-
-       } catch (Exception e) {
-           //if any exception is caught token is invalid
-           return false;
-       }
-    }
-
-    private Claims getClaims(String token) {
-        return Jwts.parser().verifyWith(jwtConfig.getSecretKey())
+    public Jwt parse(String token) {
+        var claims = Jwts.parser().verifyWith(jwtConfig.getSecretKey())
                 .build()
                 .parseSignedClaims(token)
-                .getPayload() ;
+                .getPayload();
+
+        return new Jwt(claims, jwtConfig.getSecretKey());
     }
 
-
-    public Long getIdFromToken(String token) {
-        return Long.valueOf(getClaims(token).getSubject());
-    }
-
-    public Role getRoleFromToken(String token) {
-        return Role.valueOf(getClaims(token).get("role", String.class));
-    }
 }

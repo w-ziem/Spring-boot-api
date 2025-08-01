@@ -55,12 +55,12 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<JwtResponse> refresh(@CookieValue(name = "refreshToken") String refreshToken) {
-        if (!jwtService.validateToken(refreshToken)){
+        var token = jwtService.parse(refreshToken);
+        if (token == null || token.isExpired()){
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        var userId = jwtService.getIdFromToken(refreshToken);
-        var user = userRepository.findById(userId).orElseThrow();
+        var user = userRepository.findById(token.getUserId()).orElseThrow();
         var accessToken = jwtService.generateAccessToken(user);
 
         return ResponseEntity.ok(new JwtResponse(accessToken));
@@ -70,7 +70,7 @@ public class AuthController {
     @GetMapping("/me")
     public ResponseEntity<UserDto> me(){
         var authentication = SecurityContextHolder.getContext().getAuthentication();
-        var userId = (Long) authentication.getPrincipal(); //in JwtAuthFilter we store email as principal
+        var userId = (Long) authentication.getPrincipal();
 
         var user = userRepository.findById(userId).orElse(null);
         if(user == null){

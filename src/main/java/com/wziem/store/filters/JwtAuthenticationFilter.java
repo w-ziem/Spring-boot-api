@@ -32,18 +32,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        var token = authHeader.replace("Bearer ", "");
-        if(!jwtService.validateToken(token)) {
+        var tokenString = authHeader.replace("Bearer ", "");
+        System.out.println(tokenString);
+        var token = jwtService.parse(tokenString);
+        if(token == null ||  token.isExpired()) {
+            System.err.println("BAD TOKEN: " + tokenString);
             filterChain.doFilter(request, response);
             return;
         }
-        var role = jwtService.getRoleFromToken(token);
-        var userId = jwtService.getIdFromToken(token);
-        //we store email as principle of authenticated user object
         var authentication = new UsernamePasswordAuthenticationToken(
-                userId,
+                token.getUserId(),
                 null,
-                List.of(new SimpleGrantedAuthority("ROLE_"+role))
+                List.of(new SimpleGrantedAuthority("ROLE_"+ token.getRole().name()))
         );
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
