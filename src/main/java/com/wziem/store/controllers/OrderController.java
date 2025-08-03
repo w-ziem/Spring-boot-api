@@ -3,6 +3,8 @@ package com.wziem.store.controllers;
 
 import com.wziem.store.dtos.CartCheckoutDto;
 import com.wziem.store.dtos.OrderCheckoutDto;
+import com.wziem.store.dtos.OrderSummaryDto;
+import com.wziem.store.dtos.OrdersListDto;
 import com.wziem.store.entities.CartItem;
 import com.wziem.store.entities.Order;
 import com.wziem.store.entities.OrderItem;
@@ -19,10 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -62,6 +61,36 @@ public class OrderController {
     }
 
 
+    @GetMapping("/orders")
+    public ResponseEntity<OrdersListDto> getOrders() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
+        var orders = orderRepository.findOrdersByCustomer_Id(userId);
+        System.out.println(orders.size() + " orders");
+        var responseDto = orderMapper.toOrderListDto(orders);
+        System.out.println("Mapping done");
+        return ResponseEntity.ok(responseDto);
+
+    }
+
+    @GetMapping("/orders/{orderId}")
+    public ResponseEntity<OrderSummaryDto> getOrder(@PathVariable(name = "orderId") Long orderId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = (Long) authentication.getPrincipal();
+
+        var order = orderRepository.getOrderById(orderId);
+
+        if(order == null){
+            return ResponseEntity.notFound().build();
+        }
+
+        if(!order.getCustomer().getId().equals(userId)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        return ResponseEntity.ok(orderMapper.toOrderSummaryDto(order));
+    }
 
 
 }

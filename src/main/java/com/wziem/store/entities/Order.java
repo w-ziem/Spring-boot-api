@@ -36,6 +36,7 @@ public class Order {
 
 
     @Column(name = "status")
+    @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
     @Column(name = "total_price")

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -58,6 +59,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGenericException(Exception ex) {
         System.err.println("Unexpected error occured: " + ex);
+        System.err.println("Error message: " + ex.getMessage());
+        System.err.println("Error cause: " + ex.getCause());
+        System.err.println("Error stack trace: " + Arrays.toString(ex.getStackTrace()));
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "An unexpected error occurred. Please try again later."));
     }
